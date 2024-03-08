@@ -35,11 +35,9 @@ jobs:
           echo "CHECK_STATUS=0" >> $GITHUB_ENV
 
           for changed_file in ${{ steps.pr_files.outputs.added_modified }}; do
-            echo "Checking terraform fmt on ${changed_file}..."
-
             if [[ $changed_file == *.tf ]]; then
+              echo "Checking terraform fmt on ${changed_file}..."
               terraform fmt -check $changed_file  > terraform_fmt_output.txt 2>&1 || true
-
               error_line=$(grep -i "Error:" terraform_fmt_output.txt || true)
               echo "error_line: $error_line"
               if [ -n "$error_line" ]; then
