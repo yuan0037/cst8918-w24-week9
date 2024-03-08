@@ -39,7 +39,12 @@ jobs:
               echo "Checking terraform fmt on ${changed_file}..."
               terraform fmt -check $changed_file  > terraform_fmt_output.txt 2>&1 || true
               error_line=$(grep -i "Error:" terraform_fmt_output.txt || true)
-              echo "error_line: $error_line"
+              if [[ $error_line -ne 0 ]]; then
+                echo "error_line: $error_line"
+              else
+                echo "no error for: $changed_file "
+              fi
+              
               if [ -n "$error_line" ]; then
                   FMT_STATUS=1
               else
