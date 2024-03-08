@@ -6,6 +6,6 @@ variable "labelPrefix" {
 }
 
 variable "region" {
-  type = string 
+  type    = string 
   default = "canadacentral"
 }
