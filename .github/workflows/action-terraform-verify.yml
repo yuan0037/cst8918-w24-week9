@@ -53,6 +53,24 @@ jobs:
               else
                 echo "✅ terraform fmt passed - ${changed_file}" >> $GITHUB_STEP_SUMMARY              
               fi
+
+              echo "Validating Terraform script syntax..."
+              terraform validate $changed_file > terraform_validate_output.txt 2>&1 || true
+
+              syntax_error=$(grep -i "Error:" terraform_validate_output.txt || true)
+              echo "syntax_error: $syntax_error"
+              if [ -n "$syntax_error" ]; then
+                  VALIDATE_STATUS=1
+              else
+                  VALIDATE_STATUS=0
+              fi
+              if [[ $VALIDATE_STATUS -ne 0 ]]; then
+                echo "❌ Terraform validation failed - ${changed_file}" >> $GITHUB_STEP_SUMMARY
+                echo "CHECK_STATUS=1" >> $GITHUB_ENV
+              else
+                echo "✅ Terraform validation passed - ${changed_file}" >> $GITHUB_STEP_SUMMARY
+              fi
+                            
             fi
           done
       - name: Process check
