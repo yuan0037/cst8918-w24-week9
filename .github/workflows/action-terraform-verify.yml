@@ -67,10 +67,10 @@ jobs:
               VALIDATE_STATUS=0
           fi
           if [[ $VALIDATE_STATUS -ne 0 ]]; then
-            echo "❌ Terraform validation failed - ${changed_file}" >> $GITHUB_STEP_SUMMARY
+            echo "❌ Terraform validation failed " >> $GITHUB_STEP_SUMMARY
             echo "CHECK_STATUS=1" >> $GITHUB_ENV
           else
-            echo "✅ Terraform validation passed - ${changed_file}" >> $GITHUB_STEP_SUMMARY
+            echo "✅ Terraform validation passed " >> $GITHUB_STEP_SUMMARY
           fi
       - name: Process check
         if: always()
