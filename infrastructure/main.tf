@@ -1,4 +1,4 @@
 resource "azurerm_resource_group" "rg" {
   name     = "${var.labelPrefix}-A05-RG"
-  location1 = var.region
+  location = var.region
 }
