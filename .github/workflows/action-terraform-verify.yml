@@ -38,6 +38,9 @@ jobs:
             if [[ $changed_file == *.tf ]]; then
               echo "Checking terraform fmt on ${changed_file}..."
               terraform fmt -check $changed_file  > terraform_fmt_output.txt 2>&1 || true
+              echo ">>>>>>>>>>>>>"
+              cat terraform_fmt_output.txt
+              echo "------------"
               error_line=$(grep -i "error" terraform_fmt_output.txt || true)
               if [[ $error_line -ne 0 ]]; then
                 echo "error_line: $error_line"
