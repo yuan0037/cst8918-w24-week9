@@ -38,12 +38,20 @@ jobs:
             echo "Checking terraform fmt on ${changed_file}..."
 
             if [[ $changed_file == *.tf ]]; then
-              terraform fmt -check $changed_file
-              FMT_STATUS=$(echo $?)
+              terraform fmt -check $changed_file  > terraform_fmt_output.txt 2>&1 || true
 
+              error_line=$(grep -i "Error:" terraform_fmt_output.txt || true)
+              echo "error_line: $error_line"
+              if [ -n "$error_line" ]; then
+                  FMT_STATUS=1
+              else
+                  FMT_STATUS=0
+              fi              
               if [[ $FMT_STATUS -ne 0 ]]; then
                 echo "❌ terraform fmt failed - ${changed_file}" >> $GITHUB_STEP_SUMMARY
                 echo "CHECK_STATUS=1" >> $GITHUB_ENV
+              else
+                echo "✅ terraform fmt passed - ${changed_file}" >> $GITHUB_STEP_SUMMARY              
               fi
             fi
           done
