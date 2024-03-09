@@ -33,28 +33,61 @@ jobs:
           set +e
 
           echo "CHECK_STATUS=0" >> $GITHUB_ENV
+          error_count=0
 
           for changed_file in ${{ steps.pr_files.outputs.added_modified }}; do
-            echo "Checking terraform fmt on ${changed_file}..."
-
             if [[ $changed_file == *.tf ]]; then
+              echo "Checking terraform fmt on ${changed_file}..."
               terraform fmt -check $changed_file  > terraform_fmt_output.txt 2>&1 || true
-
-              error_line=$(grep -i "Error:" terraform_fmt_output.txt || true)
-              echo "error_line: $error_line"
+              error_line=$(grep -i "error" terraform_fmt_output.txt || true)
+              if [[ $error_line -ne 0 ]]; then
+                echo "error_line: $error_line"
+                error_count=$((error_count +1))
+              else
+                echo "no error for: $changed_file "
+              fi
+              
               if [ -n "$error_line" ]; then
                   FMT_STATUS=1
               else
                   FMT_STATUS=0
               fi              
               if [[ $FMT_STATUS -ne 0 ]]; then
-                echo "❌ terraform fmt failed - ${changed_file}" >> $GITHUB_STEP_SUMMARY
-                echo "CHECK_STATUS=1" >> $GITHUB_ENV
+                echo "❌ Terraform fmt failed - ${changed_file}"
+                error_count=$((error_count +1))
               else
-                echo "✅ terraform fmt passed - ${changed_file}" >> $GITHUB_STEP_SUMMARY              
-              fi
+                echo "✅ Terraform fmt passed - ${changed_file}"
+              fi             
             fi
           done
+
+          if [[ $error_count -gt 0 ]]; then
+            echo "❌ Terraform fmt failed " >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ Terraform fmt passed " >> $GITHUB_STEP_SUMMARY              
+          fi
+
+
+          echo "Validating Terraform script syntax..."
+          terraform validate > terraform_validate_output.txt 2>&1 || true
+
+          syntax_error=$(grep -i "Error:" terraform_validate_output.txt || true)
+          echo "syntax_error: $syntax_error"
+          if [ -n "$syntax_error" ]; then
+              VALIDATE_STATUS=1
+          else
+              VALIDATE_STATUS=0
+          fi
+          if [[ $VALIDATE_STATUS -ne 0 ]]; then
+            echo "❌ Terraform validation failed " >> $GITHUB_STEP_SUMMARY            
+            error_count=$((error_count +1))
+          else
+            echo "✅ Terraform validation passed " >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [[ $VALIDATE_STATUS -ne 0 ]] || [[ $error_count -gt 0 ]]; then
+            echo "CHECK_STATUS=1" >> $GITHUB_ENV
+          fi
       - name: Process check
         if: always()
         run: exit $CHECK_STATUS
