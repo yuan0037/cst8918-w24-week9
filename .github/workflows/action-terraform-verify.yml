@@ -85,7 +85,7 @@ jobs:
             echo "✅ Terraform validation passed " >> $GITHUB_STEP_SUMMARY
           fi
           
-          if [[ $error_count -gt 0 ]]; then
+          if [[ $VALIDATE_STATUS -ne 0 ]] || [[ $error_count -gt 0 ]]; then
             echo "CHECK_STATUS=1" >> $GITHUB_ENV
           fi
       - name: Process check
