@@ -53,18 +53,18 @@ jobs:
                   FMT_STATUS=0
               fi              
               if [[ $FMT_STATUS -ne 0 ]]; then
-                echo "❌ terraform fmt failed - ${changed_file}"
+                echo "❌ Terraform fmt failed - ${changed_file}"
                 error_count=$((error_count +1))
               else
-                echo "✅ terraform fmt passed - ${changed_file}"
+                echo "✅ Terraform fmt passed - ${changed_file}"
               fi             
             fi
           done
 
           if [[ $error_count -gt 0 ]]; then
-            echo "❌ terraform fmt failed " >> $GITHUB_STEP_SUMMARY
+            echo "❌ Terraform fmt failed " >> $GITHUB_STEP_SUMMARY
           else
-            echo "✅ terraform fmt passed " >> $GITHUB_STEP_SUMMARY              
+            echo "✅ Terraform fmt passed " >> $GITHUB_STEP_SUMMARY              
           fi
 
 
